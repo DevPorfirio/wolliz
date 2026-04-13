@@ -72,7 +72,35 @@ services:
         exit 0;
       "
 
-  # ─── Backend (Django Ninja) ──────────────────────────────────────────────────
+  # ─── Migrate (roda uma vez e encerra) ──────────────────────────────────────
+  migrate:
+    build:
+      context: ../../back-end
+      dockerfile: Dockerfile
+    env_file: .env
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: ${DJANGO_DEBUG}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: postgres
+      DB_PORT: ${DB_PORT}
+      REDIS_URL: ${REDIS_URL}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET_MEDIA: ${MINIO_BUCKET_MEDIA}
+      MINIO_BUCKET_STATIC: ${MINIO_BUCKET_STATIC}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+    command: python manage.py migrate
+
+  # ─── Backend (Django + DRF) ──────────────────────────────────────────────────
   backend:
     build:
       context: ../../back-end
@@ -103,15 +131,13 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
       minio-init:
         condition: service_completed_successfully
-    command: >
-      sh -c "python manage.py migrate &&
-             uvicorn config.asgi:application --host 0.0.0.0 --port 8000 --reload"
+    command: uvicorn config.asgi:application --host 0.0.0.0 --port 8000 --reload
 
   # ─── Frontend (Nuxt 3 SSR) ───────────────────────────────────────────────────
   frontend:

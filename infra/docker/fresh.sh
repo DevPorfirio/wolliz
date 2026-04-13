@@ -10,10 +10,8 @@ docker compose down -v --rmi all --remove-orphans
 docker compose up --build --force-recreate -d
 
 echo "Aguardando backend ficar pronto..."
-until docker compose exec backend python manage.py migrate --check > /dev/null 2>&1; do
+until docker compose exec backend python manage.py check > /dev/null 2>&1; do
   sleep 2
 done
-
-docker compose exec backend python manage.py migrate
 
 docker compose logs -f
