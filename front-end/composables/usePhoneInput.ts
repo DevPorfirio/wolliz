@@ -1,7 +1,7 @@
 /**
  * Formata telefone brasileiro sem o DDI no input.
- * Exibe: 48 98416-1284
- * Armazena completo: +55 48 98416-1284
+ * Exibe: DD 99999-9999
+ * Armazena completo: +55 DD 99999-9999
  */
 
 export function formatLocalPhone(raw: string): string {

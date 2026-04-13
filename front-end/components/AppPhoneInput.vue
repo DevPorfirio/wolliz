@@ -2,7 +2,7 @@
 import { formatLocalPhone, fullToLocal, usePhoneInput } from '~/composables/usePhoneInput'
 
 const props = defineProps<{
-  modelValue?: string   // valor completo: "+55 48 98416-1284"
+  modelValue?: string   // valor completo: "+55 DD 99999-9999"
 }>()
 const emit = defineEmits<{
   'update:modelValue': [value: string]
@@ -85,7 +85,7 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
       :value="localPhone"
       type="tel"
       class="phone-input"
-      :placeholder="selectedCountry.code === 'BR' ? '48 98416-1284' : 'número'"
+      :placeholder="selectedCountry.code === 'BR' ? 'DD 99999-9999' : 'número'"
       autocomplete="tel-national"
       @input="onPhoneInput"
     />
