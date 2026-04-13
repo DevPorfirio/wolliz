@@ -21,8 +21,8 @@ SEO e escalabilidade. O projeto está dividido em 3 camadas: `front-end`, `back-
 - **Estilo**: CSS customizado (sem Tailwind por padrão)
 
 ### Back-end — `back-end/`
-- **Framework**: Django 5 + Django Ninja
-- **Auth**: JWT via `ninja-jwt` (access + refresh tokens)
+- **Framework**: Django 5.2 LTS + Django REST Framework (DRF)
+- **Auth**: JWT via `djangorestframework-simplejwt` (access + refresh tokens)
 - **ORM**: Django ORM com PostgreSQL
 - **Storage**: `django-storages` + MinIO (S3-compatible) para arquivos e imagens
 - **Cache**: Redis (django-redis)
@@ -41,7 +41,8 @@ SEO e escalabilidade. O projeto está dividido em 3 camadas: `front-end`, `back-
 | redis      | redis:7-alpine   | 6379   | Cache e filas                 |
 | minio      | minio/minio      | 9000   | Storage S3-compatible         |
 | minio-init | minio/mc         | —      | Cria buckets no boot          |
-| backend    | build local      | 8000   | API Django Ninja              |
+| migrate    | build local      | —      | Roda migrations e encerra     |
+| backend    | build local      | 8000   | API Django + DRF              |
 | frontend   | build local      | 3000   | SSR Nuxt 3                    |
 
 ---
@@ -78,12 +79,16 @@ SEO e escalabilidade. O projeto está dividido em 3 camadas: `front-end`, `back-
 
 | Método | Path                        | Descrição                  |
 |--------|-----------------------------|----------------------------|
-| POST   | /api/auth/register/         | Criar conta                |
-| POST   | /api/auth/token/            | Login (retorna JWT pair)   |
-| POST   | /api/auth/token/refresh/    | Refresh do access token    |
-| POST   | /api/auth/token/verify/     | Verificar validade token   |
-| POST   | /api/auth/logout/           | Invalida refresh token     |
-| GET    | /api/auth/me/               | Dados do usuário logado    |
+| POST   | /api/auth/register          | Criar conta                |
+| POST   | /api/auth/token             | Login (retorna JWT pair)   |
+| POST   | /api/auth/token/refresh     | Refresh do access token    |
+| POST   | /api/auth/token/verify      | Verificar validade token   |
+| POST   | /api/auth/logout            | Invalida refresh token     |
+| GET    | /api/auth/me                | Dados do usuário logado    |
+| PATCH  | /api/auth/profile           | Atualiza nome e telefone   |
+| POST   | /api/auth/change-password   | Altera senha               |
+| POST   | /api/auth/forgot-password   | Inicia recuperação de senha|
+| POST   | /api/auth/avatar            | Upload de foto de perfil   |
 
 ### Endpoints Nuxt (BFF — server routes)
 
@@ -139,8 +144,9 @@ wolliz/
 │   └── apps/
 │       └── users/
 │           ├── models.py       # User model customizado
-│           ├── schemas.py      # Ninja schemas (input/output)
-│           ├── api.py          # Ninja router
+│           ├── serializers.py  # DRF serializers (input/output)
+│           ├── views.py        # DRF APIViews
+│           ├── urls.py         # URL patterns do app
 │           └── admin.py
 └── infra/
     ├── docker/
@@ -209,6 +215,8 @@ NUXT_PUBLIC_CDN_URL=http://localhost:9000/wolliz-static  # MinIO URL pública
 - **UUID como PK**: evita enumeração de IDs
 - **Email como username**: mais natural para usuário final
 - **MinIO**: S3-compatible self-hosted, fácil migração para AWS S3 em produção
+- **APPEND_SLASH=False**: API REST sem redirecionamento de barra final
+- **Serviço `migrate` isolado**: migrations rodam uma única vez antes do backend subir, evitando race conditions ao escalar horizontalmente
 
 ---
 
@@ -233,8 +241,8 @@ cd infra/docker && docker compose logs -f
 cd infra/docker && docker compose logs -f backend
 
 # ── Django ────────────────────────────────────────────────────────────────────
-# Rodar migrations
-docker compose -f infra/docker/docker-compose.yml exec backend python manage.py migrate
+# Rodar migrations manualmente (normalmente o serviço 'migrate' faz isso no boot)
+docker compose -f infra/docker/docker-compose.yml run --rm migrate
 
 # Criar superusuário
 docker compose -f infra/docker/docker-compose.yml exec backend python manage.py createsuperuser
@@ -244,6 +252,6 @@ cd back-end && uv add nome-do-pacote
 
 # ── URLs ──────────────────────────────────────────────────────────────────────
 # Frontend:      http://localhost:3000
-# Backend docs:  http://localhost:8000/api/docs
+# Backend API:   http://localhost:8000/api/auth/
 # MinIO console: http://localhost:9001  (minioadmin / minioadmin)
 ```
