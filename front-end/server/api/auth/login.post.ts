@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event);
 
   const response = await $fetch<{ access: string; refresh: string }>(
-    `${config.apiBaseUrl}/api/token/pair`,
+    `${config.apiBaseUrl}/api/auth/token`,
     {
       method: "POST",
       body: { email: body.email, password: body.password },

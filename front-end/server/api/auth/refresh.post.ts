@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const response = await $fetch<{ access: string }>(
-    `${config.apiBaseUrl}/api/token/refresh`,
+    `${config.apiBaseUrl}/api/auth/token/refresh`,
     {
       method: "POST",
       body: { refresh: refreshToken },
