@@ -151,6 +151,7 @@ services:
       NUXT_API_BASE_URL: ${NUXT_API_BASE_URL}
       NUXT_PUBLIC_API_BASE_URL: ${NUXT_PUBLIC_API_BASE_URL}
       NUXT_PUBLIC_CDN_URL: ${NUXT_PUBLIC_CDN_URL}
+      NUXT_PUBLIC_MAPBOX_TOKEN: ${NUXT_PUBLIC_MAPBOX_TOKEN}
     volumes:
       - ../../front-end:/app:z
       - /app/node_modules
