@@ -9,19 +9,28 @@ withDefaults(defineProps<{
 </script>
 
 <template>
-  <div class="app-logo" :class="[`app-logo--${size}`, { 'app-logo--inverted': inverted }]">
+  <NuxtLink
+    to="/"
+    class="app-logo"
+    :class="[`app-logo--${size}`, { 'app-logo--inverted': inverted }]"
+    aria-label="Página inicial Wolliz"
+  >
     <span class="app-logo__icon" aria-hidden="true">W</span>
     <span class="app-logo__name">Wolliz</span>
-  </div>
+  </NuxtLink>
 </template>
 
 <style scoped>
 .app-logo {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 9px;
   user-select: none;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 }
+.app-logo:hover { text-decoration: none; }
 
 .app-logo__icon {
   flex-shrink: 0;
