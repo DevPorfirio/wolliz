@@ -68,6 +68,7 @@ services:
         mc mb --ignore-existing local/${MINIO_BUCKET_STATIC};
         mc mb --ignore-existing local/${MINIO_BUCKET_MEDIA};
         mc anonymous set download local/${MINIO_BUCKET_STATIC};
+        mc anonymous set download local/${MINIO_BUCKET_MEDIA};
         echo 'Buckets criados com sucesso.';
         exit 0;
       "
@@ -88,17 +89,23 @@ services:
       DB_PORT: ${DB_PORT}
       REDIS_URL: ${REDIS_URL}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       MINIO_BUCKET_MEDIA: ${MINIO_BUCKET_MEDIA}
       MINIO_BUCKET_STATIC: ${MINIO_BUCKET_STATIC}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
       CORS_ORIGINS: ${CORS_ORIGINS}
+      SEED_MOCK_DATA: ${SEED_MOCK_DATA:-false}
     depends_on:
       postgres:
         condition: service_healthy
     restart: "no"
-    command: python manage.py migrate
+    command: >
+      sh -c "python manage.py migrate &&
+             if [ \"$$SEED_MOCK_DATA\" = 'true' ]; then
+               python manage.py seed_properties;
+             fi"
 
   # ─── Backend (Django + DRF) ──────────────────────────────────────────────────
   backend:
@@ -118,6 +125,7 @@ services:
       DB_PORT: ${DB_PORT}
       REDIS_URL: ${REDIS_URL}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
       MINIO_BUCKET_MEDIA: ${MINIO_BUCKET_MEDIA}

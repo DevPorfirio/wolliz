@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "storages",
     # Local
     "apps.users",
+    "apps.properties",
 ]
 
 MIDDLEWARE = [
@@ -137,10 +138,14 @@ USE_TZ = True
 
 # ─── Storage (MinIO / S3) ─────────────────────────────────────────────────────
 _MINIO_ENDPOINT = config("MINIO_ENDPOINT", default="minio:9000")
+# Public endpoint used in URLs returned to the browser (the internal hostname
+# `minio:9000` only works inside the Docker network).
+MINIO_PUBLIC_ENDPOINT = config("MINIO_PUBLIC_ENDPOINT", default="localhost:9000")
 _MINIO_ACCESS_KEY = config("MINIO_ACCESS_KEY", default="minioadmin")
 _MINIO_SECRET_KEY = config("MINIO_SECRET_KEY", default="minioadmin")
 _MINIO_BUCKET_MEDIA = config("MINIO_BUCKET_MEDIA", default="wolliz-media")
 _MINIO_BUCKET_STATIC = config("MINIO_BUCKET_STATIC", default="wolliz-static")
+MINIO_INTERNAL_ENDPOINT = _MINIO_ENDPOINT
 
 STORAGES = {
     "default": {
@@ -150,8 +155,11 @@ STORAGES = {
             "access_key": _MINIO_ACCESS_KEY,
             "secret_key": _MINIO_SECRET_KEY,
             "bucket_name": _MINIO_BUCKET_MEDIA,
-            "default_acl": "private",
+            "default_acl": "public-read",
             "file_overwrite": False,
+            # No presigned signatures — browser-friendly public URLs we can
+            # safely rewrite from `minio:9000` to the public host.
+            "querystring_auth": False,
         },
     },
     "staticfiles": {

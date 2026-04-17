@@ -6,6 +6,11 @@ cd "$SCRIPT_DIR"
 
 [ -f .env ] || cp .env.example .env
 
+# Garante que o mock data está sempre ativo no fresh start
+grep -q "^SEED_MOCK_DATA=" .env \
+  && sed -i 's/^SEED_MOCK_DATA=.*/SEED_MOCK_DATA=true/' .env \
+  || echo "SEED_MOCK_DATA=true" >> .env
+
 docker compose down -v --rmi all --remove-orphans
 docker compose up --build --force-recreate -d
 
