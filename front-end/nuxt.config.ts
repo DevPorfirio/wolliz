@@ -30,6 +30,10 @@ export default defineNuxtConfig({
         { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
         { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
         { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+        {
+          rel:  "stylesheet",
+          href: "https://api.mapbox.com/mapbox-gl-js/v3.10.0/mapbox-gl.css",
+        },
       ],
     },
   },
@@ -41,8 +45,9 @@ export default defineNuxtConfig({
 
     // Público: acessível no browser também
     public: {
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || "http://localhost:8000",
-      cdnUrl: process.env.NUXT_PUBLIC_CDN_URL || "http://localhost:9000/wolliz-static",
+      apiBaseUrl:  process.env.NUXT_PUBLIC_API_BASE_URL || "http://localhost:8000",
+      cdnUrl:      process.env.NUXT_PUBLIC_CDN_URL      || "http://localhost:9000/wolliz-static",
+      mapboxToken: process.env.NUXT_PUBLIC_MAPBOX_TOKEN || "",
     },
   },
 
